@@ -1,148 +1,184 @@
-# Snake AI - Apprentissage par Renforcement avec PyTorch
+# 🐍 Snake AI - Apprentissage par Renforcement avec PyTorch
 
-Ce projet implémente un jeu Snake contrôlé par une IA utilisant l'apprentissage par renforcement (Deep Q-Learning) avec PyTorch.
+Un projet d'intelligence artificielle pour créer des agents Snake qui apprennent à jouer grâce au **Deep Q-Learning** avec PyTorch et interface graphique PyGame.
 
-## 🎮 Fonctionnalités
+## 🎯 Fonctionnalités
 
-- **Jeu Snake complet** avec interface graphique PyGame
-- **Agent d'IA** utilisant Deep Q-Network (DQN)
-- **Apprentissage par renforcement** avec exploration/exploitation
-- **Visualisation en temps réel** des performances
-- **Sauvegarde/chargement** des modèles entraînés
-
-## 📁 Structure du projet
-
-```
-├── snake_game.py    # Logique du jeu Snake
-├── agent.py         # Agent d'IA et boucle d'entraînement
-├── model.py         # Réseau de neurones DQN
-├── helper.py        # Fonctions de visualisation
-├── play.py          # Script pour jouer avec un modèle entraîné
-├── requirements.txt # Dépendances
-└── model/          # Dossier pour sauvegarder les modèles (créé automatiquement)
-```
+- 🧠 **3 agents différents** avec complexité croissante
+- 🎮 **Interface graphique** en temps réel avec PyGame
+- 📊 **Visualisation** des performances en temps réel
+- 🔄 **Système universel** pour entraîner n'importe quel agent
+- 🛠️ **Utilitaires** de gestion et nettoyage du projet
 
 ## 🚀 Installation
 
-1. **Cloner le repository**
 ```bash
-git clone <url_du_repo>
+# Cloner le projet
+git clone <votre-repo>
 cd Snake
-```
 
-2. **Installer les dépendances**
-```bash
+# Créer un environnement virtuel
+python -m venv snake_env
+source snake_env/bin/activate  # Linux/Mac
+# ou snake_env\Scripts\activate  # Windows
+
+# Installer les dépendances
 pip install -r requirements.txt
 ```
 
-## 🎯 Utilisation
+## 🤖 Les Agents
 
-### Entraîner l'IA
+### 1. Agent Original (`agent.py`)
+- **Architecture**: 11→256→3 neurones
+- **Fonctionnalités**: DQN basique, ε-greedy
+- **Performance**: Rapide à entraîner, scores élevés mais instables
 
-Pour commencer l'entraînement de l'agent IA :
+### 2. Agent Amélioré (`improved_agent.py`)
+- **Architecture**: 16→256→3 neurones
+- **Fonctionnalités**: Détection de pièges (Flood Fill), récompenses optimisées
+- **Performance**: Plus stable, évite mieux l'auto-collision
+
+### 3. Agent Enhanced (`enhanced_training.py`)
+- **Architecture**: 16→512→3 neurones
+- **Fonctionnalités**: Planification long-terme (γ=0.95), architecture optimisée
+- **Performance**: Meilleur compromis stabilité/performance
+
+## 🎮 Utilisation
+
+### Lancement Rapide (Interface Graphique)
 
 ```bash
-python agent.py
+# Mode interactif - choisir l'agent
+python launch_gui.py
+
+# Mode direct - spécifier l'agent
+python launch_gui.py Agent          # Agent original
+python launch_gui.py ImprovedAgent  # Agent amélioré
+python launch_gui.py EnhancedAgent  # Agent enhanced
 ```
 
-L'agent va :
-- Jouer de nombreuses parties
-- Apprendre de ses erreurs
-- Améliorer progressivement ses performances
-- Sauvegarder automatiquement le meilleur modèle
+### Système Universel (Avancé)
 
-### Jouer avec l'IA entraînée
+```python
+from universal_gui_trainer import UniversalGUITrainer
 
-Pour voir l'IA jouer avec un modèle pré-entraîné :
+# Entraîner n'importe quel agent
+trainer = UniversalGUITrainer('Agent')
+trainer.train_with_gui()
+
+# Test rapide sans GUI
+trainer.quick_test(num_games=10)
+```
+
+### Jouer avec un Modèle Pré-entraîné
 
 ```bash
 python play.py
 ```
 
-## 🧠 Comment ça fonctionne
+## 🛠️ Utilitaires
 
-### Environnement
-- **Espace d'état** : 11 variables binaires décrivant l'environnement
-  - Danger immédiat (tout droit, droite, gauche)
-  - Direction actuelle (4 directions)
-  - Position relative de la nourriture (4 directions)
+```bash
+# Voir les agents disponibles
+python utils.py list-agents
 
-- **Actions** : 3 actions possibles
-  - Continuer tout droit
-  - Tourner à droite
-  - Tourner à gauche
+# Statistiques du projet
+python utils.py stats
 
-- **Récompenses** :
-  - +10 pour manger de la nourriture
-  - -10 pour mourir (collision)
-  - 0 pour les autres mouvements
-
-### Architecture du réseau
-- **Couche d'entrée** : 11 neurones (état du jeu)
-- **Couche cachée** : 256 neurones avec activation ReLU
-- **Couche de sortie** : 3 neurones (Q-values pour chaque action)
-
-### Algorithme d'apprentissage
-- **Deep Q-Learning** avec replay buffer
-- **Epsilon-greedy** pour l'exploration
-- **Experience replay** pour stabiliser l'apprentissage
-- **Target network** implicite via mise à jour des poids
-
-## 📊 Paramètres d'entraînement
-
-- **Learning rate** : 0.001
-- **Gamma (discount factor)** : 0.9
-- **Epsilon decay** : 80 - nombre_de_jeux
-- **Batch size** : 1000
-- **Memory size** : 100,000
-
-## 🔧 Personnalisation
-
-Vous pouvez modifier les paramètres dans `agent.py` :
-
-```python
-MAX_MEMORY = 100_000  # Taille du replay buffer
-BATCH_SIZE = 1000     # Taille des mini-batches
-LR = 0.001           # Taux d'apprentissage
+# Nettoyage
+python utils.py clean-cache    # Cache Python
+python utils.py clean-models   # Modèles sauvegardés
+python utils.py clean-all      # Nettoyage complet
 ```
 
-Ou ajuster l'architecture du réseau dans `model.py` :
+## 📁 Structure du Projet
 
-```python
-self.model = Linear_QNet(11, 256, 3)  # input, hidden, output
+```
+Snake/
+├── 🤖 Agents
+│   ├── agent.py              # Agent original
+│   ├── improved_agent.py     # Agent amélioré
+│   └── enhanced_training.py  # Agent enhanced
+├── 🎮 Interface & Jeu
+│   ├── snake_game.py         # Moteur de jeu PyGame
+│   ├── launch_gui.py         # Lancement GUI simple
+│   └── universal_gui_trainer.py # Système universel
+├── 🧠 Modèle IA
+│   ├── model.py              # Réseau neuronal
+│   └── helper.py             # Visualisation
+├── 🎯 Utilisation
+│   ├── play.py               # Jouer avec modèle
+│   └── utils.py              # Utilitaires projet
+├── 📄 Documentation
+│   ├── README.md             # Ce fichier
+│   └── IMPROVEMENTS_SUMMARY.md # Détails techniques
+├── 📦 Configuration
+│   └── requirements.txt      # Dépendances
+└── 💾 Modèles (généré)
+    └── model/                # Modèles sauvegardés
 ```
 
-## 📈 Résultats attendus
+## 🔧 Technologies
 
-L'agent devrait :
-- Commencer par des scores très bas (0-2)
-- Progressivement améliorer ses performances
-- Atteindre des scores de 10+ après quelques centaines de jeux
-- Potentiellement atteindre 20+ avec un entraînement prolongé
+- **🐍 Python 3.8+**
+- **🔥 PyTorch** - Apprentissage profond
+- **🎮 PyGame** - Interface graphique
+- **📊 Matplotlib** - Visualisation
+- **🔢 NumPy** - Calculs numériques
 
-## 🎮 Contrôles
+## 🎯 Algorithme
 
-Pendant l'entraînement ou le jeu :
-- Fermez la fenêtre pour arrêter le programme
-- Les scores et statistiques s'affichent dans la console
+Le projet utilise le **Deep Q-Learning (DQN)** :
 
-## 🚨 Dépannage
+1. **État** : Position snake, nourriture, dangers (11-16 variables)
+2. **Actions** : Tout droit, tourner gauche/droite
+3. **Récompenses** : +10 nourriture, -10 collision, bonus optimisés
+4. **Réseau** : Fully connected layers avec ReLU
+5. **Entraînement** : Experience replay + target network
 
-**Erreur de police** : Si vous obtenez une erreur avec `arial.ttf`, modifiez dans `snake_game.py` :
-```python
-font = pygame.font.Font(None, 25)  # Utilise la police par défaut
-```
+## 📈 Résultats
 
-**Erreur d'affichage** : Si les graphiques ne s'affichent pas, commentez les lignes de visualisation dans `helper.py`.
+| Agent | Score Moyen | Record | Stabilité | Fonctionnalités |
+|-------|-------------|---------|-----------|-----------------|
+| Original | 33.7 | 67 | ±12.3 | DQN basique |
+| Amélioré | 6.9 | 19 | ±4.1 | + Flood Fill |
+| Enhanced | ~40 | 60+ | Optimisé | + Long-term Planning |
 
-## 🎯 Améliorations possibles
+## 🚀 Fonctionnalités Avancées
 
-- Ajouter des convolutions pour traiter l'image directement
-- Implémenter Double DQN ou Dueling DQN
-- Ajouter plus de features à l'espace d'état
-- Optimiser les hyperparamètres
-- Ajouter un mode multijoueur
+### Détection de Pièges (Flood Fill)
+Algorithme qui analyse l'espace libre autour du snake pour éviter de se coincer.
+
+### Système de Récompenses Intelligent
+- Récompenses progressives selon la taille
+- Bonus pour se rapprocher de la nourriture
+- Pénalités douces pour encourager l'exploration
+
+### Interface Universelle
+Le système peut automatiquement détecter et utiliser n'importe quelle classe d'agent compatible.
+
+## 🎮 Contrôles pendant l'Entraînement
+
+- **Fermer la fenêtre** : Arrêter l'entraînement
+- **Ctrl+C** : Arrêt propre dans le terminal
+- **Graphiques** : Mise à jour automatique des performances
+
+## 🔄 Améliorations Futures
+
+- 🌐 **Réseau convolutionnel** pour vision spatiale
+- 🎯 **A3C/PPO** pour exploration améliorée
+- 🏆 **Tournois** entre agents
+- 📱 **Interface web** avec Flask/Streamlit
+- 🎨 **Thèmes visuels** personnalisables
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Voir `IMPROVEMENTS_SUMMARY.md` pour les détails techniques.
+
+## 📄 Licence
+
+MIT License - voir LICENSE pour les détails.
 
 ---
 
-🎉 **Amusez-vous bien avec votre Snake IA !**
+**🎮 Amusez-vous bien avec votre Snake AI !** 🐍🤖

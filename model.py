@@ -2,41 +2,63 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import os
+import numpy as np
+import warnings
+
+# Supprimer les warnings verbeux
+warnings.filterwarnings("ignore", category=UserWarning)
 
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
+        # Détection automatique du device (GPU si disponible, sinon CPU)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
         self.linear1 = nn.Linear(input_size, hidden_size)
         self.linear2 = nn.Linear(hidden_size, output_size)
-
+        
+        # Déplacer le modèle sur le device approprié
+        self.to(self.device)
+        
     def forward(self, x):
         x = F.relu(self.linear1(x))
         x = self.linear2(x)
         return x
-
+    
     def save(self, file_name='model.pth'):
-        model_folder_path = './model'
-        if not os.path.exists(model_folder_path):
-            os.makedirs(model_folder_path)
-
-        file_name = os.path.join(model_folder_path, file_name)
         torch.save(self.state_dict(), file_name)
-
+    
+    def get_weights(self):
+        """Retourne les poids de la première couche pour visualisation"""
+        return self.linear1.weight.data.cpu().numpy()
+    
+    def get_biases(self):
+        """Retourne les biais de la première couche pour visualisation"""
+        return self.linear1.bias.data.cpu().numpy()
+    
+    def get_layer2_weights(self):
+        """Retourne les poids de la deuxième couche pour visualisation"""
+        return self.linear2.weight.data.cpu().numpy()
+    
+    def get_layer2_biases(self):
+        """Retourne les biais de la deuxième couche pour visualisation"""
+        return self.linear2.bias.data.cpu().numpy()
 
 class QTrainer:
     def __init__(self, model, lr, gamma):
         self.lr = lr
         self.gamma = gamma
         self.model = model
+        self.device = model.device  # Utilise le même device que le modèle
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
-        state = torch.tensor(state, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.long)
-        reward = torch.tensor(reward, dtype=torch.float)
+        # Créer les tensors et les déplacer sur le bon device
+        state = torch.tensor(state, dtype=torch.float).to(self.device)
+        next_state = torch.tensor(next_state, dtype=torch.float).to(self.device)
+        action = torch.tensor(action, dtype=torch.long).to(self.device)
+        reward = torch.tensor(reward, dtype=torch.float).to(self.device)
         # (n, x)
 
         if len(state.shape) == 1:
@@ -47,7 +69,7 @@ class QTrainer:
             reward = torch.unsqueeze(reward, 0)
             done = (done, )
 
-        # 1: valeur Q prédite avec l'état actuel
+        # 1: predicted Q values with current state
         pred = self.model(state)
 
         target = pred.clone()
@@ -58,7 +80,7 @@ class QTrainer:
 
             target[idx][torch.argmax(action[idx]).item()] = Q_new
     
-        # 2: Q_new = r + y * max(next_predicted Q value) -> seulement si pas terminé
+        # 2: Q_new = r + y * max(next_predicted Q value) -> only do this if not done
         # pred.clone()
         # preds[argmax(action)] = Q_new
         self.optimizer.zero_grad()

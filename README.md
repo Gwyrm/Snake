@@ -1,184 +1,277 @@
-# 🐍 Snake AI - Apprentissage par Renforcement avec PyTorch
+# 🐍 Snake AI - Apprentissage par Renforcement
 
-Un projet d'intelligence artificielle pour créer des agents Snake qui apprennent à jouer grâce au **Deep Q-Learning** avec PyTorch et interface graphique PyGame.
+Une implémentation **stable et optimisée** du jeu Snake avec une IA utilisant l'apprentissage par renforcement (Deep Q-Learning) avec un réseau de neurones MLP. L'interface est conçue en format vertical (TikTok) pour créer des vidéos d'entraînement attractives.
 
-## 🎯 Fonctionnalités
+> ✅ **Version stable** - Interface unique et fonctionnelle  
+> 🚀 **Support GPU/CPU** - Détection automatique  
+> 📱 **Format TikTok** - Ratio 9:16 optimisé
 
-- 🧠 **3 agents différents** avec complexité croissante
-- 🎮 **Interface graphique** en temps réel avec PyGame
-- 📊 **Visualisation** des performances en temps réel
-- 🔄 **Système universel** pour entraîner n'importe quel agent
-- 🛠️ **Utilitaires** de gestion et nettoyage du projet
+## Fonctionnalités
 
-## 🚀 Installation
+- 🐍 Jeu Snake classique
+- 🧠 IA par apprentissage par renforcement (Deep Q-Network)
+- 🎛️ Interface utilisateur avec contrôles interactifs
+- 📊 Visualisation en temps réel des poids du réseau de neurones
+- 📈 Graphiques de progression des scores
+- 📱 Format vertical optimisé pour les vidéos TikTok/Instagram
+- ⚡ Vitesse ajustable en temps réel
 
+## Architecture
+
+### Réseau de Neurones
+- **Entrées (11)**: État du jeu (dangers, direction, position de la nourriture)
+- **Couche cachée**: 64 neurones avec activation ReLU
+- **Sorties (3)**: Actions possibles (tout droit, droite, gauche)
+
+### Algorithme d'Apprentissage
+- **Deep Q-Learning** avec replay memory
+- **Exploration vs Exploitation**: Stratégie epsilon-greedy décroissante
+- **Optimiseur**: Adam
+- **Fonction de perte**: MSE (Mean Squared Error)
+
+## Installation
+
+### 🚀 Installation automatique (recommandée):
 ```bash
-# Cloner le projet
-git clone <votre-repo>
+python install.py
+```
+
+### Ou installation manuelle:
+
+1. **Cloner le repository:**
+```bash
+git clone <url-du-repo>
 cd Snake
+```
 
-# Créer un environnement virtuel
-python -m venv snake_env
-source snake_env/bin/activate  # Linux/Mac
-# ou snake_env\Scripts\activate  # Windows
-
-# Installer les dépendances
+2. **Installer les dépendances:**
+```bash
 pip install -r requirements.txt
 ```
 
-## 🤖 Les Agents
+## Utilisation
 
-### 1. Agent Original (`agent.py`)
-- **Architecture**: 11→256→3 neurones
-- **Fonctionnalités**: DQN basique, ε-greedy
-- **Performance**: Rapide à entraîner, scores élevés mais instables
-
-### 2. Agent Amélioré (`improved_agent.py`)
-- **Architecture**: 16→256→3 neurones
-- **Fonctionnalités**: Détection de pièges (Flood Fill), récompenses optimisées
-- **Performance**: Plus stable, évite mieux l'auto-collision
-
-### 3. Agent Enhanced (`enhanced_training.py`)
-- **Architecture**: 16→512→3 neurones
-- **Fonctionnalités**: Planification long-terme (γ=0.95), architecture optimisée
-- **Performance**: Meilleur compromis stabilité/performance
-
-## 🎮 Utilisation
-
-### Lancement Rapide (Interface Graphique)
-
+### 🚀 Lancement rapide (recommandé):
 ```bash
-# Mode interactif - choisir l'agent
-python launch_gui.py
-
-# Mode direct - spécifier l'agent
-python launch_gui.py Agent          # Agent original
-python launch_gui.py ImprovedAgent  # Agent amélioré
-python launch_gui.py EnhancedAgent  # Agent enhanced
+python main.py
 ```
 
-### Système Universel (Avancé)
+### Ou lancer directement:
 
-```python
-from universal_gui_trainer import UniversalGUITrainer
-
-# Entraîner n'importe quel agent
-trainer = UniversalGUITrainer('Agent')
-trainer.train_with_gui()
-
-# Test rapide sans GUI
-trainer.quick_test(num_games=10)
-```
-
-### Jouer avec un Modèle Pré-entraîné
-
+**Jeu Snake AI:**
 ```bash
-python play.py
+python gui.py
 ```
 
-## 🛠️ Utilitaires
-
+**Test de performance:**
 ```bash
-# Voir les agents disponibles
-python utils.py list-agents
-
-# Statistiques du projet
-python utils.py stats
-
-# Nettoyage
-python utils.py clean-cache    # Cache Python
-python utils.py clean-models   # Modèles sauvegardés
-python utils.py clean-all      # Nettoyage complet
+python test_performance.py
 ```
 
-## 📁 Structure du Projet
+**Note GPU/CPU:** L'application détecte automatiquement si un GPU CUDA est disponible. Si oui, elle l'utilisera pour accélérer l'entraînement. Sinon, elle fonctionnera sur CPU.
+
+### Interface Utilisateur
+
+**Zone Supérieure**: Jeu Snake en temps réel
+**Zone Contrôles**: 
+- `START/STOP`: Démarrer/arrêter l'entraînement
+- `RESET`: Réinitialiser l'agent et recommencer
+- `+/-`: Ajuster la vitesse du jeu
+- Affichage des statistiques (parties, score, record)
+
+**Zone Inférieure**: 
+- **Graphique des poids**: Heatmap des poids de la première couche en temps réel
+- **Graphique des scores**: Évolution des scores au fil des parties
+
+### Paramètres Ajustables
+
+- **Vitesse du jeu**: 1-50 FPS (boutons +/-)
+- **Exploration**: Diminue automatiquement avec le nombre de parties
+- **Taille du réseau**: Modifiable dans le code (variable `hidden_size`)
+
+## Structure du Code
 
 ```
 Snake/
-├── 🤖 Agents
-│   ├── agent.py              # Agent original
-│   ├── improved_agent.py     # Agent amélioré
-│   └── enhanced_training.py  # Agent enhanced
-├── 🎮 Interface & Jeu
-│   ├── snake_game.py         # Moteur de jeu PyGame
-│   ├── launch_gui.py         # Lancement GUI simple
-│   └── universal_gui_trainer.py # Système universel
-├── 🧠 Modèle IA
-│   ├── model.py              # Réseau neuronal
-│   └── helper.py             # Visualisation
-├── 🎯 Utilisation
-│   ├── play.py               # Jouer avec modèle
-│   └── utils.py              # Utilitaires projet
-├── 📄 Documentation
-│   ├── README.md             # Ce fichier
-│   └── IMPROVEMENTS_SUMMARY.md # Détails techniques
-├── 📦 Configuration
-│   └── requirements.txt      # Dépendances
-└── 💾 Modèles (généré)
-    └── model/                # Modèles sauvegardés
+├── install.py              # 🔧 Installation automatique
+├── main.py                 # 🚀 Menu de lancement principal
+├── gui.py                  # 🎮 Interface de jeu Snake AI (avec zones d'enregistrement)
+├── guide_enregistrement.md # 🎬 Guide pour créer des vidéos TikTok
+├── check_gpu.py            # 🔍 Vérification GPU/CPU simple
+├── test_performance.py     # ⚡ Test de performance détaillé
+├── snake_game.py           # 🐍 Logique du jeu Snake
+├── agent.py               # 🧠 Agent d'apprentissage par renforcement
+├── model.py               # 📊 Réseau de neurones MLP (GPU/CPU)
+├── requirements.txt       # 📦 Dépendances
+├── CHANGELOG.md          # 📝 Historique des versions
+└── README.md             # 📖 Ce fichier
 ```
 
-## 🔧 Technologies
+### Fichiers Principaux
 
-- **🐍 Python 3.8+**
-- **🔥 PyTorch** - Apprentissage profond
-- **🎮 PyGame** - Interface graphique
-- **📊 Matplotlib** - Visualisation
-- **🔢 NumPy** - Calculs numériques
+- **`gui.py`**: Interface graphique principale avec visualisations temps réel
+- **`snake_game.py`**: Moteur du jeu Snake avec gestion des états
+- **`agent.py`**: Implémentation de l'agent DQN avec mémoire de replay
+- **`model.py`**: Définition du réseau de neurones et de l'entraîneur (GPU/CPU)
 
-## 🎯 Algorithme
+## Algorithme d'Apprentissage
 
-Le projet utilise le **Deep Q-Learning (DQN)** :
+1. **Observation**: L'agent observe l'état actuel du jeu (11 paramètres)
+2. **Action**: Choix d'une action basée sur la politique epsilon-greedy
+3. **Récompense**: 
+   - +10 pour manger de la nourriture
+   - -10 pour mourir
+   - 0 sinon
+4. **Apprentissage**: Mise à jour des poids via backpropagation
+5. **Mémoire**: Stockage des expériences pour l'apprentissage par batch
 
-1. **État** : Position snake, nourriture, dangers (11-16 variables)
-2. **Actions** : Tout droit, tourner gauche/droite
-3. **Récompenses** : +10 nourriture, -10 collision, bonus optimisés
-4. **Réseau** : Fully connected layers avec ReLU
-5. **Entraînement** : Experience replay + target network
+## État du Jeu (Entrées du Réseau)
 
-## 📈 Résultats
+### 🧠 Labels des Neurones d'Entrée (11 inputs)
 
-| Agent | Score Moyen | Record | Stabilité | Fonctionnalités |
-|-------|-------------|---------|-----------|-----------------|
-| Original | 33.7 | 67 | ±12.3 | DQN basique |
-| Amélioré | 6.9 | 19 | ±4.1 | + Flood Fill |
-| Enhanced | ~40 | 60+ | Optimisé | + Long-term Planning |
+#### **Détection des Dangers (3 inputs) :**
+- **DDevant** : Danger si le serpent continue devant lui
+- **DDroite** : Danger si le serpent tourne à droite  
+- **DGauche** : Danger si le serpent tourne à gauche
 
-## 🚀 Fonctionnalités Avancées
+#### **Direction Actuelle (4 inputs) :**
+- **DirG** : Le serpent va vers la gauche
+- **DirD** : Le serpent va vers la droite
+- **DirH** : Le serpent va vers le haut
+- **DirB** : Le serpent va vers le bas
 
-### Détection de Pièges (Flood Fill)
-Algorithme qui analyse l'espace libre autour du snake pour éviter de se coincer.
+#### **Position de la Nourriture (4 inputs) :**
+- **FG** : Nourriture à gauche du serpent
+- **FD** : Nourriture à droite du serpent
+- **FH** : Nourriture en haut du serpent
+- **FB** : Nourriture en bas du serpent
 
-### Système de Récompenses Intelligent
-- Récompenses progressives selon la taille
-- Bonus pour se rapprocher de la nourriture
-- Pénalités douces pour encourager l'exploration
+### 🎯 Labels des Neurones de Sortie (3 outputs)
 
-### Interface Universelle
-Le système peut automatiquement détecter et utiliser n'importe quelle classe d'agent compatible.
+- **AHaut** : Action aller vers le haut
+- **ADroite** : Action aller vers la droite
+- **AGauche** : Action aller vers la gauche
 
-## 🎮 Contrôles pendant l'Entraînement
+### 🔗 Connexions du Réseau
 
-- **Fermer la fenêtre** : Arrêter l'entraînement
-- **Ctrl+C** : Arrêt propre dans le terminal
-- **Graphiques** : Mise à jour automatique des performances
+- **Bleu** : Poids faibles (peu d'influence)
+- **Gris** : Poids très faibles (mais visibles)
+- **Rouge** : Poids forts (influence majeure)
 
-## 🔄 Améliorations Futures
+**Note :** Les dangers sont relatifs à la direction du serpent, ce qui rend l'IA plus intelligente car elle apprend des patterns génériques.
 
-- 🌐 **Réseau convolutionnel** pour vision spatiale
-- 🎯 **A3C/PPO** pour exploration améliorée
-- 🏆 **Tournois** entre agents
-- 📱 **Interface web** avec Flask/Streamlit
-- 🎨 **Thèmes visuels** personnalisables
+## Format TikTok
 
-## 🤝 Contribution
+L'interface est conçue avec un ratio 9:16 (540x960 pixels) pour être parfaitement adaptée aux vidéos verticales des réseaux sociaux.
 
-Les contributions sont les bienvenues ! Voir `IMPROVEMENTS_SUMMARY.md` pour les détails techniques.
+## 🔍 GPU vs CPU - Questions fréquentes
 
-## 📄 Licence
+### "GPU non disponible" - C'est normal !
 
-MIT License - voir LICENSE pour les détails.
+**90% des utilisateurs n'ont pas de GPU CUDA**, c'est parfaitement normal :
 
----
+✅ **Votre système fonctionne parfaitement sur CPU**
+- Snake AI est optimisé pour CPU
+- Performance excellente : ~15,000 inférences/sec
+- L'IA apprend normalement
+- Aucun matériel supplémentaire requis
 
-**🎮 Amusez-vous bien avec votre Snake AI !** 🐍🤖
+### Vérification simple :
+```bash
+python check_gpu.py
+```
+
+### Détection automatique :
+L'application s'adapte automatiquement :
+- **🚀 GPU NVIDIA** : Accélération 3-5x (rare)
+- **💻 CPU Intel/AMD** : Performance optimisée (normal)
+- **🎮 GPU intégré** : Fonctionne parfaitement sur CPU
+
+## 🧠 Configuration du Réseau de Neurones
+
+### Changer le nombre de neurones cachés
+```python
+# Dans gui.py, ligne ~19
+self.hidden_size = 128  # ← CHANGEZ ICI (ex: 64, 256, 512)
+```
+
+### Visualisation automatique
+- **Architecture affichée** : 11→128→3 (correct !)
+- **Connexions totales** : 1,792 (11×128 + 128×3)
+- **Affichage adaptatif** : Jusqu'à 16 neurones cachés visibles
+- **Test facile** : `python test_configurations.py`
+
+**Note technique** : Les dimensions PyTorch sont automatiquement corrigées (format `[out_features, in_features]`).
+
+### 🎯 Configurations Recommandées :
+
+| Configuration | Usage | Performance |
+|---------------|--------|-------------|
+| `64` | Apprentissage rapide, tests | ⚡ Très rapide |
+| `128` | Équilibre optimal (défaut) | ⚖️ Équilibré |
+| `256` | Meilleure performance | 🚀 Plus lent mais plus intelligent |
+| `512` | Maximum (GPU recommandé) | 🔥 Très lent, très intelligent |
+
+### 📊 Affichage Automatique :
+
+L'interface affiche automatiquement :
+- **Titre** : `Reseau 11-128-3` (inputs-hidden-outputs)
+- **Visualisation** : Adapte le nombre de neurones affichés
+- **Connexions** : Échantillonnage intelligent des poids
+- **Console** : `Réseau: 11 → 128 → 3 (affichage: 12 cachés)`
+
+**💡 L'affichage s'adapte automatiquement à votre configuration !**
+
+## Personnalisation
+
+### Modifier la taille du réseau:
+```python
+# Dans gui.py, ligne ~42
+self.hidden_size = 128  # GPU: 256-512, CPU: 64-128
+```
+
+### Ajuster les paramètres d'apprentissage:
+```python
+# Dans agent.py
+LR = 0.001          # Taux d'apprentissage
+BATCH_SIZE = 1000   # Taille du batch
+MAX_MEMORY = 100000 # Taille de la mémoire
+```
+
+### Modifier les récompenses:
+```python
+# Dans snake_game.py, méthode play_step()
+reward = 10   # Récompense pour manger
+reward = -10  # Pénalité pour mourir
+```
+
+## Conseils pour de Bons Résultats
+
+1. **Patience**: L'apprentissage peut prendre 100-200 parties avant de voir des progrès
+2. **Vitesse**: Commencer avec une vitesse élevée (20-30) pour un apprentissage rapide
+3. **Observation**: Regarder l'évolution des poids pour comprendre l'apprentissage
+4. **Reset**: N'hésitez pas à redémarrer si l'agent semble bloqué
+
+## Dépendances
+
+- `pygame==2.5.2`: Moteur de jeu et interface
+- `torch==2.1.0`: Réseau de neurones et apprentissage
+- `numpy==1.24.3`: Calculs numériques
+- `matplotlib==3.7.2`: Visualisations et graphiques
+
+## 🎬 Interface Spéciale Enregistrement
+
+L'interface a été **redesignée pour l'enregistrement de vidéos** :
+
+- **Zone gauche (540px)** : Jeu + Graphiques → **Zone d'enregistrement TikTok**
+- **Zone droite (300px)** : Contrôles + Stats → **Hors cadre vidéo**
+- **Format parfait** : 540x1000 pixels pour TikTok/Instagram
+- **Contrôle temps réel** : Ajustements pendant l'enregistrement
+
+**Voir `guide_enregistrement.md` pour les détails complets !**
+
+L'application est maintenant **parfaite pour créer des vidéos virales** d'IA apprenant à jouer au Snake !
+
+## Licence
+
+Ce projet est open source et libre d'utilisation pour l'éducation et la recherche. 

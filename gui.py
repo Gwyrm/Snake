@@ -18,7 +18,7 @@ class SnakeAIGUI:
         self.GAME_WIDTH = 560   # Agrandi de 480 à 560
         self.GAME_HEIGHT = 560  # Agrandi de 480 à 560
         self.GAME_X = (self.RECORD_WIDTH - self.GAME_WIDTH) // 2
-        self.GAME_Y = 120  # Plus bas pour faire place aux stats
+        self.GAME_Y = 80  # Plus haut, directement sous le texte
         
         # Zone des contrôles (partie droite, hors enregistrement)
         self.CONTROLS_X = self.RECORD_WIDTH + 20  # Début de la zone de contrôles
@@ -47,7 +47,7 @@ class SnakeAIGUI:
         self.game_speed = 15
         
         # 🔧 CONFIGURATION DU RÉSEAU - Modifiable facilement
-        self.hidden_size = 128  # ← CHANGEZ ICI le nombre de neurones cachés (ex: 64, 256, 512)
+        self.hidden_size = 32  # ← CHANGEZ ICI le nombre de neurones cachés (ex: 64, 256, 512)
         
         # Initialisation du jeu et de l'agent
         self.game = SnakeGameAI(w=self.GAME_WIDTH, h=self.GAME_HEIGHT, block_size=20)
@@ -261,7 +261,7 @@ class SnakeAIGUI:
         # Zone pour les poids (directement sous le graphique des scores)
         graph_area = pygame.Rect(30, self.GAME_Y + self.GAME_HEIGHT + 30, self.RECORD_WIDTH - 60, 180)
         weights_y = graph_area.bottom + 20  # Directement sous le graphique
-        weights_area = pygame.Rect(20, weights_y, self.RECORD_WIDTH - 40, 180)  # Réduit à 180px sans légende
+        weights_area = pygame.Rect(20, weights_y, self.RECORD_WIDTH - 40, 250)  # Agrandi à 250px de hauteur
         
         # Fond avec gradient et bordure moderne
         pygame.draw.rect(self.screen, (15, 15, 30), weights_area)  # Fond plus sombre
@@ -281,14 +281,14 @@ class SnakeAIGUI:
         else:
             config_text = f'Reseau {self.hidden_size}N'
             
-        title = self.small_font.render(config_text, True, (100, 200, 255))
-        title_rect = title.get_rect(center=(weights_area.centerx, weights_area.top + 15))
-        self.screen.blit(title, title_rect)
+        # title = self.small_font.render(config_text, True, (100, 200, 255))
+        # title_rect = title.get_rect(center=(weights_area.centerx, weights_area.top + 15))
+        # self.screen.blit(title, title_rect)
         
         if len(self.weights_history) > 0:
             # Zone pour le réseau (décalée à droite pour les labels)
-            network_area = pygame.Rect(weights_area.left + 60, weights_area.top + 25,  # Décalé de 15 à 60
-                                     weights_area.width - 120, 120)  # Hauteur fixe de 120px
+            network_area = pygame.Rect(weights_area.left + 100, weights_area.top + 25,  # Encore plus d'espace à gauche
+                                     weights_area.width - 200, 180)  # Agrandi à 180px de hauteur
             
             # Récupérer les poids actuels
             try:
@@ -306,8 +306,7 @@ class SnakeAIGUI:
                 output_neurons = weights2.shape[0]  # Nombre réel d'outputs (out_features de linear2)
                 
                 # Limiter l'affichage pour la lisibilité mais rester proportionnel
-                max_display_hidden = min(16, max(8, real_hidden_neurons // 8))  # Entre 8 et 16
-                hidden_neurons = min(max_display_hidden, real_hidden_neurons)
+                hidden_neurons = real_hidden_neurons
                 
                 # Debug uniquement si changement (éviter le spam)
                 # print(f"Réseau: {input_neurons} → {real_hidden_neurons} → {output_neurons} (affichage: {hidden_neurons} cachés)")
@@ -316,26 +315,31 @@ class SnakeAIGUI:
                 layer_width = network_area.width // 3
                 
                 # Couche d'entrée (gauche) - avec espace pour labels seulement
-                input_x = network_area.left + layer_width // 4  # Moins d'espace nécessaire
-                input_y_start = network_area.top + 20  
-                input_spacing = (network_area.height - 40) // (input_neurons - 1) if input_neurons > 1 else 0
+                input_x = network_area.left + layer_width // 10  # Plus d'espace à gauche
+                input_y_start = network_area.top + 10
+                input_spacing = (network_area.height - 10) // (input_neurons - 1) if input_neurons > 1 else 0
                 
                 # Couche cachée (centre) 
                 hidden_x = network_area.left + layer_width + layer_width // 2
-                hidden_y_start = network_area.top + 20
-                hidden_spacing = (network_area.height - 40) // (hidden_neurons - 1) if hidden_neurons > 1 else 0
+                hidden_y_start = network_area.top + 10  # Plus d'espace en haut
+                hidden_spacing = (network_area.height - 10) // (hidden_neurons - 1) if hidden_neurons > 1 else 0  # Espacement normal
+                
+                # Augmenter l'espacement en réduisant la zone utilisée
+                hidden_neurons_display = hidden_neurons  # Afficher tous les neurones
+                if hidden_neurons_display > 1:
+                    hidden_spacing = (network_area.height - 10) // (hidden_neurons_display - 1)
                 
                 # Couche de sortie (droite) - avec espace pour labels seulement
-                output_x = network_area.left + 2 * layer_width + layer_width // 3  # Moins d'espace nécessaire
-                output_y_start = network_area.top + (network_area.height - output_neurons * 30) // 2  
-                output_spacing = 30
+                output_x = network_area.left + 2 * layer_width + 2 * layer_width // 3  # Plus d'espace à droite
+                output_y_start = network_area.top + 10
+                output_spacing = (network_area.height - 10) // (output_neurons - 1) if output_neurons > 1 else 0
                 
                 # Dessiner les connexions (input -> hidden) - adaptatif
                 connection_step = max(1, real_hidden_neurons // hidden_neurons)  # Échantillonnage intelligent
                 
                 for i in range(input_neurons):
                     input_pos = (input_x, input_y_start + i * input_spacing)
-                    for display_j in range(hidden_neurons):
+                    for display_j in range(hidden_neurons_display):
                         # Mapper l'index d'affichage vers l'index réel du réseau
                         real_j = display_j * connection_step
                         if real_j < real_hidden_neurons:
@@ -347,18 +351,18 @@ class SnakeAIGUI:
                                 
                                 # Assurer une visibilité minimale même pour les poids très faibles
                                 if weight_val < 0.02:
-                                    # Connexions très faibles en gris foncé
-                                    color = (40, 40, 60)
+                                    # Connexions très faibles en gris clair
+                                    color = (100, 100, 120)
                                 else:
-                                    # Connexions normales en bleu->rouge
+                                    # Connexions normales en jaune->orange->rouge
                                     color_intensity = int(weight_val * 255)
-                                    color = (color_intensity, 0, 255 - color_intensity)
+                                    color = (255, 255 - color_intensity, 0)
                                 
                                 # Afficher TOUTES les connexions
                                 pygame.draw.line(self.screen, color, input_pos, hidden_pos, 1)
                 
                 # Dessiner les connexions (hidden -> output) - TOUTES les connexions
-                for display_i in range(hidden_neurons):
+                for display_i in range(hidden_neurons_display):
                     real_i = display_i * connection_step
                     if real_i < real_hidden_neurons:
                         hidden_pos = (hidden_x, hidden_y_start + display_i * hidden_spacing)
@@ -371,12 +375,12 @@ class SnakeAIGUI:
                                 
                                 # Assurer une visibilité minimale même pour les poids très faibles
                                 if weight_val < 0.02:
-                                    # Connexions très faibles en gris foncé
-                                    color = (40, 40, 60)
+                                    # Connexions très faibles en gris clair
+                                    color = (100, 100, 120)
                                 else:
-                                    # Connexions normales en bleu->rouge
+                                    # Connexions normales en jaune->orange->rouge
                                     color_intensity = int(weight_val * 255)
-                                    color = (color_intensity, 0, 255 - color_intensity)
+                                    color = (255, 255 - color_intensity, 0)
                                 
                                 # Afficher TOUTES les connexions
                                 pygame.draw.line(self.screen, color, hidden_pos, output_pos, 1)
@@ -387,20 +391,20 @@ class SnakeAIGUI:
                 for i in range(input_neurons):
                     pos = (input_x, input_y_start + i * input_spacing)
                     # Neurones d'entrée plus gros
-                    pygame.draw.circle(self.screen, (120, 255, 120), pos, 4)
-                    pygame.draw.circle(self.screen, (80, 200, 80), pos, 2)
+                    pygame.draw.circle(self.screen, (120, 255, 120), pos, 5)
+                    pygame.draw.circle(self.screen, (80, 200, 80), pos, 3)
                     
                     # Label court à gauche du neurone
                     if i < len(input_short_labels):
-                        label_text = self.small_font.render(input_short_labels[i], True, (150, 255, 150))
-                        self.screen.blit(label_text, (pos[0] - 45, pos[1] - 5))
+                        label_text = self.font.render(input_short_labels[i], True, (150, 255, 150))
+                        self.screen.blit(label_text, (pos[0] - 85, pos[1] - 8))
                 
                 # Couche cachée
-                for i in range(hidden_neurons):
+                for i in range(hidden_neurons_display):
                     pos = (hidden_x, hidden_y_start + i * hidden_spacing)
                     # Neurones cachés plus gros
-                    pygame.draw.circle(self.screen, (255, 255, 120), pos, 4)
-                    pygame.draw.circle(self.screen, (200, 200, 80), pos, 2)
+                    pygame.draw.circle(self.screen, (255, 255, 120), pos, 5)
+                    pygame.draw.circle(self.screen, (200, 200, 80), pos, 3)
                 
                 # Couche de sortie avec labels courts et valeurs
                 output_short_labels = ['AHaut', 'ADroite', 'AGauche']
@@ -408,17 +412,19 @@ class SnakeAIGUI:
                 for i in range(output_neurons):
                     pos = (output_x, output_y_start + i * output_spacing)
                     # Neurones de sortie encore plus gros
-                    pygame.draw.circle(self.screen, (255, 120, 120), pos, 5)
-                    pygame.draw.circle(self.screen, (200, 80, 80), pos, 3)
+                    pygame.draw.circle(self.screen, (255, 120, 120), pos, 6)
+                    pygame.draw.circle(self.screen, (200, 80, 80), pos, 4)
                     
                     # Label court à droite du neurone
                     if i < len(output_short_labels):
-                        label_text = self.small_font.render(output_short_labels[i], True, self.WHITE)
-                        self.screen.blit(label_text, (pos[0] + 15, pos[1] - 5))
+                        label_text = self.font.render(output_short_labels[i], True, self.WHITE)
+                        # Aligner à droite en calculant la position
+                        label_rect = label_text.get_rect()
+                        self.screen.blit(label_text, (pos[0] + 40, pos[1] - 8))
                 
                 # Légende améliorée avec plus d'espace
                 legend_y = network_area.bottom + 15  # Plus d'espace
-                legend_text = self.small_font.render('Connexions: Bleu=faible  Gris=tres faible  Rouge=fort', True, (200, 200, 200))
+                legend_text = self.small_font.render('Connexions: Jaune=faible  Gris=tres faible  Rouge=fort', True, (200, 200, 200))
                 legend_rect = legend_text.get_rect(center=(weights_area.centerx, legend_y))
                 self.screen.blit(legend_text, legend_rect)
                 
@@ -438,15 +444,10 @@ class SnakeAIGUI:
         # Fond
         self.screen.fill(self.BLACK)
         
-        # Titre (centré sur la zone d'enregistrement)
-        title = self.big_font.render('Snake AI', True, self.WHITE)
-        title_rect = title.get_rect(center=(self.RECORD_WIDTH//2, 30))
-        self.screen.blit(title, title_rect)
-        
         # Nombre de parties au-dessus du snake
         parties_text = f"Parties: {self.agent.n_games}"
-        parties = self.font.render(parties_text, True, self.WHITE)
-        parties_rect = parties.get_rect(center=(self.RECORD_WIDTH//2, 70))
+        parties = self.big_font.render(parties_text, True, self.WHITE)
+        parties_rect = parties.get_rect(center=(self.RECORD_WIDTH//2, 30))
         self.screen.blit(parties, parties_rect)
         
         # Stats principales (Record et Moyenne) visibles dans l'enregistrement
@@ -456,8 +457,8 @@ class SnakeAIGUI:
         else:
             main_stats_text = f"Record: {self.record}  •  Score: {self.game.score}"
         
-        main_stats = self.small_font.render(main_stats_text, True, (150, 255, 150))
-        main_stats_rect = main_stats.get_rect(center=(self.RECORD_WIDTH//2, 95))
+        main_stats = self.big_font.render(main_stats_text, True, (150, 255, 150))
+        main_stats_rect = main_stats.get_rect(center=(self.RECORD_WIDTH//2, 55))
         self.screen.blit(main_stats, main_stats_rect)
         
         # Ligne de séparation entre zone d'enregistrement et zone de contrôles

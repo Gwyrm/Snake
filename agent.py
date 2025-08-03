@@ -55,7 +55,11 @@ class Agent:
             state0 = torch.tensor(state, dtype=torch.float).to(self.device)
             prediction = self.model(state0)
             # Stocker les valeurs de prédiction pour la visualisation
-            self.last_action_values = prediction.cpu().detach().numpy().tolist()
+            # Conversion sécurisée vers CPU puis numpy
+            if prediction.is_cuda:
+                self.last_action_values = prediction.cpu().detach().numpy().tolist()
+            else:
+                self.last_action_values = prediction.detach().numpy().tolist()
             move = torch.argmax(prediction).item()
             final_move[move] = 1
 
